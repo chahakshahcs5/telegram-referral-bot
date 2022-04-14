@@ -1,1 +1,1 @@
-web: ts-node bot.ts
+web: node dist/bot.js
