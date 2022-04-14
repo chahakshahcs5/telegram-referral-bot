@@ -1,1 +1,1 @@
-web: node bor.ts
+web: node bot.ts
