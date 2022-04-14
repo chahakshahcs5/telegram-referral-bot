@@ -1,1 +1,1 @@
-web: node bot.ts
+web: ts-node bot.ts
