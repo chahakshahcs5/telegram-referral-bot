@@ -4,7 +4,8 @@
   "main": "bot.js",
   "scripts": {
     "dev": "nodemon --exec ts-node bot.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node bot.ts"
   },
   "devDependencies": {
     "@types/express": "^4.17.13",
