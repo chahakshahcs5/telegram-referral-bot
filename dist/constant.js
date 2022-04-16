@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.unknownCommand = exports.importantMsg = exports.claimNearMsg = exports.showInviteLink = exports.showBalance = exports.followTweeter = exports.initTask = exports.initMsg = exports.cancelKeyboard = exports.initKeyboard = void 0;
+exports.unknownCommand = exports.importantMsg = exports.claimNearMsg = exports.showInviteLink = exports.showBalance = exports.completed = exports.reTweet = exports.followTweeter = exports.initTask = exports.initMsg = exports.cancelKeyboard = exports.initKeyboard = void 0;
 exports.initKeyboard = [
     [{ text: "Start Tasks" }],
     [{ text: "💰 Check Your Balance" }, { text: "🗣 Invitation Link" }],
@@ -23,6 +23,12 @@ Note:  All tasks are mandatory so please complete them carefully. We'll check it
 exports.followTweeter = `Follow our twitter account:
 https://www.twitter.com/Nearnft
 And send your Twitter account username`;
+exports.reTweet = `Like and Retweet the pinned tweet:
+https://twitter.com/NearNft/status/1513468070509281283?s=20&t=H08tFWBm8a3_Y-gcLhOdow
+
+And send us on your retweeted link`;
+const completed = (first_name) => `Congratulations ${first_name} 🎊 you completed all the task and  your 0.01 $NEAR will be credited into your wallet within 48 hours.`;
+exports.completed = completed;
 exports.showBalance = `👋 Hello Vodafone
 
 Your current Account balance is 

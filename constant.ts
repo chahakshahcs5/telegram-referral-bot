@@ -23,6 +23,14 @@ export const followTweeter = `Follow our twitter account:
 https://www.twitter.com/Nearnft
 And send your Twitter account username`;
 
+export const retweet = `Like and Retweet the pinned tweet:
+https://twitter.com/NearNft/status/1513468070509281283?s=20&t=H08tFWBm8a3_Y-gcLhOdow
+
+And send us on your retweeted link`;
+
+export const completed = (first_name: string) =>
+  `Congratulations ${first_name} 🎊 you completed all the task and  your 0.01 $NEAR will be credited into your wallet within 48 hours.`;
+
 export const showBalance = `👋 Hello Vodafone
 
 Your current Account balance is 
