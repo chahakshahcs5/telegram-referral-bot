@@ -193,6 +193,7 @@ bot.on("text", async (ctx) => {
           resize_keyboard: true,
         },
       });
+      const refData = await referral.findOne({ userId: ctx.from.id });
       await userData.create({
         userId: ctx.from.id,
         username: ctx.from.username,
@@ -200,6 +201,15 @@ bot.on("text", async (ctx) => {
         retweetUrl: ctx.message.text,
         balance: 0.01,
       });
+      const refUserData = await userData.findOne({
+        userId: refData.referrerId,
+      });
+      await userData.findOneAndUpdate(
+        {
+          userId: refData.referrerId,
+        },
+        { $set: { balance: refUserData.balance + 0.01 } }
+      );
       ctx.session = { state: "", twitterUsername: "", retweetUrl: "" };
     }
   } catch (error) {
