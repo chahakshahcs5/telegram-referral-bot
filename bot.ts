@@ -2,7 +2,6 @@ import express, { Request, Response } from "express";
 import mongoose from "mongoose";
 import { Context, Telegraf, session } from "telegraf";
 import { parse as json2csv } from "json2csv";
-import fs from "fs";
 require("dotenv").config();
 
 import {
@@ -18,8 +17,10 @@ import {
   unknownCommand,
   retweet,
   completed,
+  claimedMsg,
 } from "./constant";
 import userData from "./models/user_data";
+import referral from "./models/referral";
 
 interface SessionData {
   state: string;
@@ -35,25 +36,48 @@ interface MyContext extends Context {
 const bot = new Telegraf<MyContext>(process.env.BOT_TOKEN || "");
 bot.use(session());
 
-bot.start((ctx) => {
-  bot.telegram.sendMessage(ctx.chat.id, initMsg(ctx.from.first_name));
-  bot.telegram.sendMessage(ctx.chat.id, initTask, {
-    reply_markup: {
-      keyboard: initKeyboard,
-      resize_keyboard: true,
-    },
-  });
-  ctx.session ??= { state: "start", twitterUsername: "", retweetUrl: "" };
+bot.start(async (ctx) => {
+  try {
+    if (ctx.startPayload) {
+      await referral.create({
+        userId: ctx.from.id,
+        referrerId: ctx.startPayload,
+      });
+    }
+    bot.telegram.sendMessage(ctx.chat.id, initMsg(ctx.from.first_name));
+    bot.telegram.sendMessage(ctx.chat.id, initTask, {
+      reply_markup: {
+        keyboard: initKeyboard,
+        resize_keyboard: true,
+      },
+    });
+    ctx.session ??= { state: "start", twitterUsername: "", retweetUrl: "" };
+  } catch (error) {}
 });
 
-bot.hears("Start Tasks", (ctx) => {
-  bot.telegram.sendMessage(ctx.chat.id, followTweeter, {
-    reply_markup: {
-      keyboard: cancelKeyboard,
-      resize_keyboard: true,
-    },
-  });
-  ctx.session = { state: "twitter", twitterUsername: "", retweetUrl: "" };
+bot.hears("Start Tasks", async (ctx) => {
+  try {
+    const data = await userData.findOne({ userId: ctx.from.id });
+    if (data) {
+      bot.telegram.sendMessage(ctx.chat.id, claimedMsg, {
+        reply_markup: {
+          keyboard: initKeyboard,
+          resize_keyboard: true,
+        },
+      });
+      ctx.session = { state: "", twitterUsername: "", retweetUrl: "" };
+    } else {
+      bot.telegram.sendMessage(ctx.chat.id, followTweeter, {
+        reply_markup: {
+          keyboard: cancelKeyboard,
+          resize_keyboard: true,
+        },
+      });
+      ctx.session = { state: "twitter", twitterUsername: "", retweetUrl: "" };
+    }
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 bot.hears("🚫 Cancel", (ctx) => {
@@ -66,22 +90,44 @@ bot.hears("🚫 Cancel", (ctx) => {
   ctx.session = { state: "", twitterUsername: "", retweetUrl: "" };
 });
 
-bot.hears("💰 Check Your Balance", (ctx) => {
-  bot.telegram.sendMessage(ctx.chat.id, showBalance, {
-    reply_markup: {
-      keyboard: initKeyboard,
-      resize_keyboard: true,
-    },
-  });
+bot.hears("💰 Check Your Balance", async (ctx) => {
+  try {
+    const data = await userData.findOne({ userId: ctx.from.id });
+    bot.telegram.sendMessage(
+      ctx.chat.id,
+      showBalance(data ? data.balance : 0),
+      {
+        reply_markup: {
+          keyboard: initKeyboard,
+          resize_keyboard: true,
+        },
+      }
+    );
+  } catch (error) {
+    console.log(error);
+  }
 });
 
-bot.hears("🗣 Invitation Link", (ctx) => {
-  bot.telegram.sendMessage(ctx.chat.id, showInviteLink, {
-    reply_markup: {
-      keyboard: initKeyboard,
-      resize_keyboard: true,
-    },
-  });
+bot.hears("🗣 Invitation Link", async (ctx) => {
+  try {
+    const referres = await referral.find({ referrerId: ctx.from.id });
+    bot.telegram.sendMessage(
+      ctx.chat.id,
+      showInviteLink(
+        ctx.from.id,
+        referres.length,
+        process.env.BOT_USERNAME || ""
+      ),
+      {
+        reply_markup: {
+          keyboard: initKeyboard,
+          resize_keyboard: true,
+        },
+      }
+    );
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 bot.hears("💸 Claim Your $NEAR", (ctx) => {
@@ -152,6 +198,7 @@ bot.on("text", async (ctx) => {
         username: ctx.from.username,
         twitterUsename: ctx.session.twitterUsername,
         retweetUrl: ctx.message.text,
+        balance: 0.01,
       });
       ctx.session = { state: "", twitterUsername: "", retweetUrl: "" };
     }

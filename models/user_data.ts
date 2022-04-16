@@ -5,6 +5,7 @@ const userDataSchema = new mongoose.Schema({
   username: { type: String, unique: true, required: true },
   twitterUsename: { type: String, unique: true, required: true },
   retweetUrl: { type: String, unique: true, required: true },
+  balance: Number,
   createdAt: { type: Date, default: new Date() },
 });
 

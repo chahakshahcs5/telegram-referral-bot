@@ -31,16 +31,20 @@ And send us on your retweeted link`;
 export const completed = (first_name: string) =>
   `Congratulations ${first_name} 🎊 you completed all the task and  your 0.01 $NEAR will be credited into your wallet within 48 hours.`;
 
-export const showBalance = `👋 Hello Vodafone
+export const showBalance = (balance: number) => `👋 Hello Vodafone
 
 Your current Account balance is 
-0 NEAR`;
+${balance} NEAR`;
 
-export const showInviteLink = `🤝 Vodafone here is your invitation link. Share it with friends to earn $NEAR
+export const showInviteLink = (
+  id: number,
+  refCount: number,
+  botUsername: String
+) => `🤝 Vodafone here is your invitation link. Share it with friends to earn $NEAR
 
-https://t.me/nearnftgiveaway_bot?start=r09839821944
+https://t.me/${botUsername}?start=${id}
 
-There is/are currently 0 users invited`;
+There is/are currently ${refCount} users invited`;
 
 export const claimNearMsg = `Please submit your NEAR wallet address
 
@@ -65,3 +69,5 @@ Menu structure has been modified by Admin.
 
 ℹ️ Do not send Messages directly to the Bot or
 reload the Menu by pressing /start`;
+
+export const claimedMsg = `You have already claimed your rewards.`;
