@@ -18,6 +18,7 @@ import {
   retweet,
   completed,
   claimedMsg,
+  enterWalletAddress,
 } from "./constant";
 import userData from "./models/user_data";
 import referral from "./models/referral";
@@ -26,6 +27,7 @@ interface SessionData {
   state: string;
   twitterUsername: string;
   retweetUrl: string;
+  walletAddress: string;
 }
 
 // Define your own context type
@@ -45,8 +47,13 @@ bot.start(async (ctx) => {
         resize_keyboard: true,
       },
     });
-    ctx.session ??= { state: "start", twitterUsername: "", retweetUrl: "" };
-    if (ctx.startPayload) {
+    ctx.session ??= {
+      state: "start",
+      twitterUsername: "",
+      retweetUrl: "",
+      walletAddress: "",
+    };
+    if (ctx.startPayload && ctx.from.id.toString() != ctx.startPayload) {
       await referral.create({
         userId: ctx.from.id,
         referrerId: ctx.startPayload,
@@ -65,7 +72,12 @@ bot.hears("Start Tasks", async (ctx) => {
           resize_keyboard: true,
         },
       });
-      ctx.session = { state: "", twitterUsername: "", retweetUrl: "" };
+      ctx.session = {
+        state: "",
+        twitterUsername: "",
+        retweetUrl: "",
+        walletAddress: "",
+      };
     } else {
       bot.telegram.sendMessage(ctx.chat.id, followTweeter, {
         reply_markup: {
@@ -73,7 +85,12 @@ bot.hears("Start Tasks", async (ctx) => {
           resize_keyboard: true,
         },
       });
-      ctx.session = { state: "twitter", twitterUsername: "", retweetUrl: "" };
+      ctx.session = {
+        state: "twitter",
+        twitterUsername: "",
+        retweetUrl: "",
+        walletAddress: "",
+      };
     }
   } catch (error) {
     console.log(error);
@@ -87,7 +104,12 @@ bot.hears("🚫 Cancel", (ctx) => {
       resize_keyboard: true,
     },
   });
-  ctx.session = { state: "", twitterUsername: "", retweetUrl: "" };
+  ctx.session = {
+    state: "",
+    twitterUsername: "",
+    retweetUrl: "",
+    walletAddress: "",
+  };
 });
 
 bot.hears("💰 Check Your Balance", async (ctx) => {
@@ -155,6 +177,8 @@ bot.command("export", async (ctx) => {
       "username",
       "twitterUsername",
       "retweetUrl",
+      "walletAddress",
+      "referrerId",
       "createdAt",
     ];
 
@@ -185,32 +209,59 @@ bot.on("text", async (ctx) => {
         state: "retweet",
         twitterUsername: ctx.message.text,
         retweetUrl: "",
+        walletAddress: "",
       };
     } else if (ctx.session.state == "retweet") {
+      bot.telegram.sendMessage(ctx.chat.id, enterWalletAddress, {
+        reply_markup: {
+          keyboard: initKeyboard,
+          resize_keyboard: true,
+        },
+      });
+      ctx.session = {
+        state: "walletAddress",
+        twitterUsername: ctx.session.twitterUsername,
+        retweetUrl: ctx.message.text,
+        walletAddress: "",
+      };
+    } else if (ctx.session.state == "walletAddress") {
       bot.telegram.sendMessage(ctx.chat.id, completed(ctx.from.first_name), {
         reply_markup: {
           keyboard: initKeyboard,
           resize_keyboard: true,
         },
       });
+      // get referrer data
       const refData = await referral.findOne({ userId: ctx.from.id });
+      // create an entry for user
       await userData.create({
         userId: ctx.from.id,
         username: ctx.from.username,
-        twitterUsename: ctx.session.twitterUsername,
-        retweetUrl: ctx.message.text,
+        twitterUsername: ctx.session.twitterUsername,
+        retweetUrl: ctx.session.retweetUrl,
+        walletAddress: ctx.message.text,
+        referrerId: refData ? refData.referrerId : "",
         balance: 0.01,
       });
-      const refUserData = await userData.findOne({
-        userId: refData.referrerId,
-      });
-      await userData.findOneAndUpdate(
-        {
+      if (refData) {
+        // get referrer user data
+        const refUserData = await userData.findOne({
           userId: refData.referrerId,
-        },
-        { $set: { balance: refUserData.balance + 0.01 } }
-      );
-      ctx.session = { state: "", twitterUsername: "", retweetUrl: "" };
+        });
+        // update balance of referrer user
+        await userData.findOneAndUpdate(
+          {
+            userId: refData.referrerId,
+          },
+          { $set: { balance: refUserData.balance + 0.01 } }
+        );
+      }
+      ctx.session = {
+        state: "",
+        twitterUsername: "",
+        retweetUrl: "",
+        walletAddress: "",
+      };
     }
   } catch (error) {
     console.log(error);

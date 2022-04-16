@@ -71,3 +71,5 @@ Menu structure has been modified by Admin.
 reload the Menu by pressing /start`;
 
 export const claimedMsg = `You have already claimed your rewards.`;
+
+export const enterWalletAddress = `📝 Please enter your wallet address.`;
