@@ -38,12 +38,6 @@ bot.use(session());
 
 bot.start(async (ctx) => {
   try {
-    if (ctx.startPayload) {
-      await referral.create({
-        userId: ctx.from.id,
-        referrerId: ctx.startPayload,
-      });
-    }
     bot.telegram.sendMessage(ctx.chat.id, initMsg(ctx.from.first_name));
     bot.telegram.sendMessage(ctx.chat.id, initTask, {
       reply_markup: {
@@ -52,6 +46,12 @@ bot.start(async (ctx) => {
       },
     });
     ctx.session ??= { state: "start", twitterUsername: "", retweetUrl: "" };
+    if (ctx.startPayload) {
+      await referral.create({
+        userId: ctx.from.id,
+        referrerId: ctx.startPayload,
+      });
+    }
   } catch (error) {}
 });
 
