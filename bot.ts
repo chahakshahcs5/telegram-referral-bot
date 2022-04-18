@@ -180,6 +180,7 @@ bot.command("export", async (ctx) => {
       "retweetUrl",
       "walletAddress",
       "referrerId",
+      "balance",
       "createdAt",
     ];
 
