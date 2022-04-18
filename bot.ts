@@ -117,7 +117,7 @@ bot.hears("💰 Check Your Balance", async (ctx) => {
     const data = await userData.findOne({ userId: ctx.from.id });
     bot.telegram.sendMessage(
       ctx.chat.id,
-      showBalance(data ? data.balance : 0),
+      showBalance(data ? data.balance : 0, ctx.from.first_name),
       {
         reply_markup: {
           keyboard: initKeyboard,
@@ -138,7 +138,8 @@ bot.hears("🗣 Invitation Link", async (ctx) => {
       showInviteLink(
         ctx.from.id,
         referres.length,
-        process.env.BOT_USERNAME || ""
+        process.env.BOT_USERNAME || "",
+        ctx.from.first_name
       ),
       {
         reply_markup: {

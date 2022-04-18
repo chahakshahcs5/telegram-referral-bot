@@ -31,7 +31,10 @@ And send us on your retweeted link`;
 export const completed = (first_name: string) =>
   `Congratulations ${first_name} 🎊 you completed all the task and  your 0.01 $NEAR will be credited into your wallet within 48 hours.`;
 
-export const showBalance = (balance: number) => `👋 Hello Vodafone
+export const showBalance = (
+  balance: number,
+  username: String
+) => `👋 Hello ${username}
 
 Your current Account balance is 
 ${balance} NEAR`;
@@ -39,8 +42,9 @@ ${balance} NEAR`;
 export const showInviteLink = (
   id: number,
   refCount: number,
-  botUsername: String
-) => `🤝 Vodafone here is your invitation link. Share it with friends to earn $NEAR
+  botUsername: String,
+  username: String
+) => `🤝 ${username} here is your invitation link. Share it with friends to earn $NEAR
 
 https://t.me/${botUsername}?start=${id}
 
