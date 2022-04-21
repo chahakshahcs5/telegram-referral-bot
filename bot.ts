@@ -195,6 +195,7 @@ bot.command("export", async (ctx) => {
       "walletAddress",
       "referrerId",
       "balance",
+      "claimNear",
       "createdAt",
     ];
 
