@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.unknownCommand = exports.importantMsg = exports.claimNearMsg = exports.showInviteLink = exports.showBalance = exports.completed = exports.reTweet = exports.followTweeter = exports.initTask = exports.initMsg = exports.cancelKeyboard = exports.initKeyboard = void 0;
+exports.userDoesNotExists = exports.claimNear = exports.enterWalletAddress = exports.claimedMsg = exports.unknownCommand = exports.importantMsg = exports.claimNearMsg = exports.showInviteLink = exports.showBalance = exports.completed = exports.retweet = exports.followTweeter = exports.initTask = exports.initMsg = exports.cancelKeyboard = exports.initKeyboard = void 0;
 exports.initKeyboard = [
     [{ text: "Start Tasks" }],
     [{ text: "💰 Check Your Balance" }, { text: "🗣 Invitation Link" }],
@@ -23,21 +23,23 @@ Note:  All tasks are mandatory so please complete them carefully. We'll check it
 exports.followTweeter = `Follow our twitter account:
 https://www.twitter.com/Nearnft
 And send your Twitter account username`;
-exports.reTweet = `Like and Retweet the pinned tweet:
+exports.retweet = `Like and Retweet the pinned tweet:
 https://twitter.com/NearNft/status/1513468070509281283?s=20&t=H08tFWBm8a3_Y-gcLhOdow
 
 And send us on your retweeted link`;
 const completed = (first_name) => `Congratulations ${first_name} 🎊 you completed all the task and  your 0.01 $NEAR will be credited into your wallet within 48 hours.`;
 exports.completed = completed;
-exports.showBalance = `👋 Hello Vodafone
+const showBalance = (balance, username) => `👋 Hello ${username}
 
 Your current Account balance is 
-0 NEAR`;
-exports.showInviteLink = `🤝 Vodafone here is your invitation link. Share it with friends to earn $NEAR
+${balance} NEAR`;
+exports.showBalance = showBalance;
+const showInviteLink = (id, refCount, botUsername, username) => `🤝 ${username} here is your invitation link. Share it with friends to earn $NEAR
 
-https://t.me/nearnftgiveaway_bot?start=r09839821944
+https://t.me/${botUsername}?start=${id}
 
-There is/are currently 0 users invited`;
+There is/are currently ${refCount} users invited`;
+exports.showInviteLink = showInviteLink;
 exports.claimNearMsg = `Please submit your NEAR wallet address
 
 
@@ -59,3 +61,7 @@ Menu structure has been modified by Admin.
 
 ℹ️ Do not send Messages directly to the Bot or
 reload the Menu by pressing /start`;
+exports.claimedMsg = `You have already claimed your rewards.`;
+exports.enterWalletAddress = `📝 Please enter your wallet address.`;
+exports.claimNear = `We will send $NEAR to your submitted wallet address within 48 hours`;
+exports.userDoesNotExists = `Sorry, You don't have any $NEAR to claim.`;
