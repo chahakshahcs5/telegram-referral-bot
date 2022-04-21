@@ -19,6 +19,8 @@ import {
   completed,
   claimedMsg,
   enterWalletAddress,
+  claimNear,
+  userDoesNotExists,
 } from "./constant";
 import userData from "./models/user_data";
 import referral from "./models/referral";
@@ -28,6 +30,7 @@ interface SessionData {
   twitterUsername: string;
   retweetUrl: string;
   walletAddress: string;
+  claimNear: string;
 }
 
 // Define your own context type
@@ -52,6 +55,7 @@ bot.start(async (ctx) => {
       twitterUsername: "",
       retweetUrl: "",
       walletAddress: "",
+      claimNear: "",
     };
     if (ctx.startPayload && ctx.from.id.toString() != ctx.startPayload) {
       await referral.create({
@@ -77,6 +81,7 @@ bot.hears("Start Tasks", async (ctx) => {
         twitterUsername: "",
         retweetUrl: "",
         walletAddress: "",
+        claimNear: "",
       };
     } else {
       bot.telegram.sendMessage(ctx.chat.id, followTweeter, {
@@ -90,6 +95,7 @@ bot.hears("Start Tasks", async (ctx) => {
         twitterUsername: "",
         retweetUrl: "",
         walletAddress: "",
+        claimNear: "",
       };
     }
   } catch (error) {
@@ -109,6 +115,7 @@ bot.hears("🚫 Cancel", (ctx) => {
     twitterUsername: "",
     retweetUrl: "",
     walletAddress: "",
+    claimNear: "",
   };
 });
 
@@ -160,6 +167,13 @@ bot.hears("💸 Claim Your $NEAR", (ctx) => {
       resize_keyboard: true,
     },
   });
+  ctx.session = {
+    state: "claimNear",
+    twitterUsername: "",
+    retweetUrl: "",
+    walletAddress: "",
+    claimNear: "",
+  };
 });
 
 bot.hears("📌 Important Message", (ctx) => {
@@ -212,6 +226,7 @@ bot.on("text", async (ctx) => {
         twitterUsername: ctx.message.text,
         retweetUrl: "",
         walletAddress: "",
+        claimNear: "",
       };
     } else if (ctx.session.state == "retweet") {
       bot.telegram.sendMessage(ctx.chat.id, enterWalletAddress, {
@@ -225,6 +240,7 @@ bot.on("text", async (ctx) => {
         twitterUsername: ctx.session.twitterUsername,
         retweetUrl: ctx.message.text,
         walletAddress: "",
+        claimNear: "",
       };
     } else if (ctx.session.state == "walletAddress") {
       bot.telegram.sendMessage(ctx.chat.id, completed(ctx.from.first_name), {
@@ -263,6 +279,36 @@ bot.on("text", async (ctx) => {
         twitterUsername: "",
         retweetUrl: "",
         walletAddress: "",
+        claimNear: "",
+      };
+    } else if (ctx.session.state == "claimNear") {
+      const data = await userData.findOne({ userId: ctx.from.id });
+      if (data) {
+        bot.telegram.sendMessage(ctx.chat.id, claimNear, {
+          reply_markup: {
+            keyboard: initKeyboard,
+            resize_keyboard: true,
+          },
+        });
+        await userData.findByIdAndUpdate(data._id, {
+          $set: {
+            claimNear: ctx.message.text,
+          },
+        });
+      } else {
+        bot.telegram.sendMessage(ctx.chat.id, userDoesNotExists, {
+          reply_markup: {
+            keyboard: initKeyboard,
+            resize_keyboard: true,
+          },
+        });
+      }
+      ctx.session = {
+        state: "",
+        twitterUsername: "",
+        retweetUrl: "",
+        walletAddress: "",
+        claimNear: "",
       };
     }
   } catch (error) {

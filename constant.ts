@@ -77,3 +77,7 @@ reload the Menu by pressing /start`;
 export const claimedMsg = `You have already claimed your rewards.`;
 
 export const enterWalletAddress = `📝 Please enter your wallet address.`;
+
+export const claimNear = `We will send $NEAR to your submitted wallet address within 48 hours`;
+
+export const userDoesNotExists = `Sorry, You don't have any $NEAR to claim.`;

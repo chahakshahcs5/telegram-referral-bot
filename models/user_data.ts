@@ -8,6 +8,7 @@ const userDataSchema = new mongoose.Schema({
   walletAddress: { type: String, required: true },
   referrerId: Number,
   balance: Number,
+  claimNear: String,
   createdAt: { type: Date, default: new Date() },
 });
 
