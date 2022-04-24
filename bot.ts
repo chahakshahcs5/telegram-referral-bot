@@ -27,6 +27,7 @@ import {
 import userData from "./models/user_data";
 import referral from "./models/referral";
 import general from "./models/general";
+import { ConnectionOptions } from "tls";
 
 interface SessionData {
   state: string;
@@ -124,10 +125,10 @@ bot.hears("🚫 Cancel", (ctx) => {
 
 bot.hears("💰 Check Your Balance", async (ctx) => {
   try {
-    const data = await userData.findOne({ userId: ctx.from.id });
+    const data = await userData.find({ userId: ctx.from.id });
     bot.telegram.sendMessage(
       ctx.chat.id,
-      showBalance(data ? data.balance : 0, ctx.from.first_name),
+      showBalance(data.length ? data.length * 0.01 : 0, ctx.from.first_name),
       {
         reply_markup: {
           keyboard: initKeyboard,
@@ -369,8 +370,13 @@ app.use(bot.webhookCallback(secretPath));
 
 const PORT = process.env.PORT || 5000;
 
-mongoose.connect(process.env.DB_CONNECTION_URL || "").then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server is listening on port ${PORT}`);
+mongoose
+  .connect(process.env.DB_CONNECTION_URL!, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  } as ConnectionOptions)
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is listening on port ${PORT}`);
+    });
   });
-});
