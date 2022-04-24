@@ -23,8 +23,10 @@ export const followTweeter = `Follow our twitter account:
 https://www.twitter.com/Nearnft
 And send your Twitter account username`;
 
-export const retweet = `Like and Retweet the pinned tweet:
-https://twitter.com/NearNft/status/1513468070509281283?s=20&t=H08tFWBm8a3_Y-gcLhOdow
+export const retweet = (
+  retweetUrl: string
+) => `Like and Retweet the pinned tweet:
+${retweetUrl}
 
 And send us on your retweeted link`;
 
@@ -81,3 +83,5 @@ export const enterWalletAddress = `📝 Please enter your wallet address.`;
 export const claimNear = `We will send $NEAR to your submitted wallet address within 48 hours`;
 
 export const userDoesNotExists = `Sorry, You don't have any $NEAR to claim.`;
+export const updateRetweetUrl = `Please enter new retweet url`;
+export const successUpdateRT = `You have successfully updated Retweet URL.`;

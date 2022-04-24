@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 
 const userDataSchema = new mongoose.Schema({
-  userId: { type: String, unique: true, required: true },
-  username: { type: String, unique: true, required: true },
-  twitterUsername: { type: String, unique: true, required: true },
-  retweetUrl: { type: String, unique: true, required: true },
+  userId: { type: String, required: true },
+  username: { type: String, required: true },
+  twitterUsername: { type: String, required: true },
+  retweetUrl: { type: String, required: true },
   walletAddress: { type: String, required: true },
   referrerId: Number,
   balance: Number,

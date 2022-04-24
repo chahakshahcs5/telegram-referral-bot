@@ -21,9 +21,12 @@ import {
   enterWalletAddress,
   claimNear,
   userDoesNotExists,
+  updateRetweetUrl,
+  successUpdateRT,
 } from "./constant";
 import userData from "./models/user_data";
 import referral from "./models/referral";
+import general from "./models/general";
 
 interface SessionData {
   state: string;
@@ -68,36 +71,36 @@ bot.start(async (ctx) => {
 
 bot.hears("Start Tasks", async (ctx) => {
   try {
-    const data = await userData.findOne({ userId: ctx.from.id });
-    if (data) {
-      bot.telegram.sendMessage(ctx.chat.id, claimedMsg, {
-        reply_markup: {
-          keyboard: initKeyboard,
-          resize_keyboard: true,
-        },
-      });
-      ctx.session = {
-        state: "",
-        twitterUsername: "",
-        retweetUrl: "",
-        walletAddress: "",
-        claimNear: "",
-      };
-    } else {
-      bot.telegram.sendMessage(ctx.chat.id, followTweeter, {
-        reply_markup: {
-          keyboard: cancelKeyboard,
-          resize_keyboard: true,
-        },
-      });
-      ctx.session = {
-        state: "twitter",
-        twitterUsername: "",
-        retweetUrl: "",
-        walletAddress: "",
-        claimNear: "",
-      };
-    }
+    // const data = await userData.findOne({ userId: ctx.from.id });
+    // if (data) {
+    //   bot.telegram.sendMessage(ctx.chat.id, claimedMsg, {
+    //     reply_markup: {
+    //       keyboard: initKeyboard,
+    //       resize_keyboard: true,
+    //     },
+    //   });
+    //   ctx.session = {
+    //     state: "",
+    //     twitterUsername: "",
+    //     retweetUrl: "",
+    //     walletAddress: "",
+    //     claimNear: "",
+    //   };
+    // } else {
+    bot.telegram.sendMessage(ctx.chat.id, followTweeter, {
+      reply_markup: {
+        keyboard: cancelKeyboard,
+        resize_keyboard: true,
+      },
+    });
+    ctx.session = {
+      state: "twitter",
+      twitterUsername: "",
+      retweetUrl: "",
+      walletAddress: "",
+      claimNear: "",
+    };
+    // }
   } catch (error) {
     console.log(error);
   }
@@ -211,12 +214,28 @@ bot.command("export", async (ctx) => {
   }
 });
 
+bot.command("/updaterturl", async (ctx) => {
+  if (ctx.from.id.toString() == process.env.OWNER_ID) {
+    bot.telegram.sendMessage(ctx.chat.id, updateRetweetUrl);
+    ctx.session = {
+      state: "updaterturl",
+      twitterUsername: "",
+      retweetUrl: "",
+      walletAddress: "",
+      claimNear: "",
+    };
+  } else {
+    bot.telegram.sendMessage(ctx.chat.id, unknownCommand);
+  }
+});
+
 bot.on("text", async (ctx) => {
   try {
     if (!ctx.session?.state) {
       bot.telegram.sendMessage(ctx.chat.id, unknownCommand);
     } else if (ctx.session.state == "twitter") {
-      bot.telegram.sendMessage(ctx.chat.id, retweet, {
+      const data = await general.find({});
+      bot.telegram.sendMessage(ctx.chat.id, retweet(data[0].retweetUrl), {
         reply_markup: {
           keyboard: cancelKeyboard,
           resize_keyboard: true,
@@ -252,6 +271,7 @@ bot.on("text", async (ctx) => {
       });
       // get referrer data
       const refData = await referral.findOne({ userId: ctx.from.id });
+      const userExists = await userData.findOne({ userId: ctx.from.id });
       // create an entry for user
       await userData.create({
         userId: ctx.from.id,
@@ -262,7 +282,7 @@ bot.on("text", async (ctx) => {
         referrerId: refData ? refData.referrerId : "",
         balance: 0.01,
       });
-      if (refData) {
+      if (refData && !userExists) {
         // get referrer user data
         const refUserData = await userData.findOne({
           userId: refData.referrerId,
@@ -311,6 +331,17 @@ bot.on("text", async (ctx) => {
         walletAddress: "",
         claimNear: "",
       };
+    } else if (ctx.session.state == "updaterturl") {
+      const data = await general.find({});
+      await general.findByIdAndUpdate(data[0]._id, {
+        $set: { retweetUrl: ctx.message.text },
+      });
+      bot.telegram.sendMessage(ctx.chat.id, successUpdateRT, {
+        reply_markup: {
+          keyboard: initKeyboard,
+          resize_keyboard: true,
+        },
+      });
     }
   } catch (error) {
     console.log(error);
